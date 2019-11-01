@@ -1,6 +1,11 @@
 'use strict';
 
 (() => {
+  const TIMEOUT = 2000;
+  const Key = {
+    ENTER: 'Enter'
+  };
+
   const elFirstImage = document.querySelector('.slider__image--first');
   const elFirstWebpImage = document.querySelector('.js-slider-first-webp');
 
@@ -19,24 +24,49 @@
     document.body.classList.toggle('js-scroll');
   };
 
-  const changeImagesHandler = window.debounce(() => {
-    elFirstImage.classList.remove('slider__image--first-animation');
-    elFirstImage.classList.add('slider__image--first-animation');
+  const changeClassesForAnimation = (isSlow) => {
+    let postfix = isSlow ? "-slow" : "-fast";
 
-    elSecondImage.classList.remove('slider__image--second-animation');
-    elSecondImage.classList.add('slider__image--second-animation');
+    elFirstImage.classList.remove(`slider__image--first-animation${postfix}`);
+    elFirstImage.classList.add(`slider__image--first-animation${postfix}`);
+
+    elSecondImage.classList.remove(`slider__image--second-animation${postfix}`);
+    elSecondImage.classList.add(`slider__image--second-animation${postfix}`);
     preventHorizontalScroll();
 
     setTimeout(() => {
-      elFirstImage.classList.remove('slider__image--first-animation');
-      elSecondImage.classList.remove('slider__image--second-animation');
+      elFirstImage.classList.remove(`slider__image--first-animation${postfix}`);
+      elSecondImage.classList.remove(`slider__image--second-animation${postfix}`);
       preventHorizontalScroll();
-    }, 2000);
+    }, TIMEOUT);
+  };
 
+  const changeImagesFastHandler = window.debounce(() => {
+    changeClassesForAnimation(false);
     replaceImageAddresses();
   });
 
-  elsControlButtons.forEach((elControlButton) => {
-    elControlButton.addEventListener('click', changeImagesHandler);
+  const changeImagesSlowHandler = window.debounce(() => {
+    changeClassesForAnimation(true);
+    replaceImageAddresses();
   });
+
+  const changeImagesFastKeyHandler = window.debounce((evt) => {
+    if (evt.key === Key.ENTER) {
+      changeClassesForAnimation(false);
+      replaceImageAddresses();
+    }
+  });
+
+  const changeImagesSlowKeyHandler = window.debounce((evt) => {
+    if (evt.key === Key.ENTER) {
+      changeClassesForAnimation(true);
+      replaceImageAddresses();
+    }
+  });
+
+  elsControlButtons[0].addEventListener('click', changeImagesFastHandler);
+  elsControlButtons[0].addEventListener('keydown', changeImagesFastKeyHandler);
+  elsControlButtons[1].addEventListener('click', changeImagesSlowHandler);
+  elsControlButtons[1].addEventListener('keydown', changeImagesSlowKeyHandler);
 })();
